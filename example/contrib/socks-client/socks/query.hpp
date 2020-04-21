@@ -30,10 +30,24 @@ public:
     class const_iterator
     {
     public:
-        using value_type = std::pair<string_view, string_view>;
+        struct value_type
+        {
+            string_view name;
+            string_view value;
+
+            value_type const& operator*() const noexcept
+            {
+                return *this;
+            }
+
+            value_type const* operator->() const noexcept
+            {
+                return this;
+            }
+        };
         using difference_type = std::ptrdiff_t;
-        using reference = value_type&;
-        using pointer = const value_type*;
+        using reference = value_type;
+        using pointer = const value_type;
         using iterator_category = std::forward_iterator_tag;
 
         const_iterator() = default;
@@ -50,13 +64,13 @@ public:
         reference
         operator*() const noexcept
         {
-            return const_cast<reference>(value_);
+            return value_;
         }
 
         pointer
         operator->() const noexcept
         {
-            return &value_;
+            return value_;
         }
 
         const_iterator&
@@ -77,10 +91,10 @@ public:
         bool
         operator==(const const_iterator &other) const noexcept
         {
-            if ((value_.first.data() == other.value_.first.data() &&
-                value_.first.size() == other.value_.first.size()) &&
-                (value_.second.data() == other.value_.second.data() &&
-                value_.second.size() == other.value_.second.size()))
+            if ((value_.name.data() == other.value_.name.data() &&
+                value_.name.size() == other.value_.name.size()) &&
+                (value_.value.data() == other.value_.value.data() &&
+                value_.value.size() == other.value_.value.size()))
                 return true;
             return false;
         }
@@ -91,24 +105,12 @@ public:
             return !(*this == other);
         }
 
-        string_view
-        key() const noexcept
-        {
-            return value_.first;
-        }
-
-        string_view
-        value() const noexcept
-        {
-            return value_.second;
-        }
-
     private:
-        BOOST_BEAST_DECL
+        inline
         void
         parse() noexcept;
 
-        BOOST_BEAST_DECL
+        inline
         void
         increment();
 
@@ -116,14 +118,14 @@ public:
         value_type value_;
     };
 
-    BOOST_BEAST_DECL
+    inline
     const_iterator
     begin() const
     {
         return const_iterator{s_};
     }
 
-    BOOST_BEAST_DECL
+    inline
     const_iterator
     end() const
     {

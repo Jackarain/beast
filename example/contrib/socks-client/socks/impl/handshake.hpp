@@ -30,19 +30,19 @@ namespace socks {
 
 namespace detail {
 
-template<typename type, typename source>
-type read(source& p)
+template<typename Type, typename Source>
+Type read(Source& p)
 {
-    type ret = 0;
-    for (std::size_t i = 0; i < sizeof(type); i++)
+    Type ret = 0;
+    for (std::size_t i = 0; i < sizeof(Type); i++)
         ret = (ret << 8) | (static_cast<unsigned char>(*p++));
     return ret;
 }
 
-template<typename type, typename target>
-void write(type v, target& p)
+template<typename Type, typename Target>
+void write(Type v, Target& p)
 {
-    for (auto i = (int)sizeof(type) - 1; i >= 0; i--, p++)
+    for (auto i = (int)sizeof(Type) - 1; i >= 0; i--, p++)
         *p = static_cast<unsigned char>((v >> (i * 8)) & 0xff);
 }
 
@@ -61,8 +61,8 @@ public:
     socks4_op(socks4_op const&) = default;
 
     socks4_op(Stream& stream, Handler& handler,
-        const std::string& hostname, unsigned short port,
-        const std::string& username)
+        string_view hostname, unsigned short port,
+        string_view username)
         : base_type(std::move(handler), stream.get_executor())
         , stream_(stream)
         , hostname_(hostname)
@@ -164,7 +164,7 @@ private:
 
     std::string hostname_;
     unsigned short port_;
-    std::string username_;
+    string_view username_;
     int step_ = 0;
 };
 
@@ -183,10 +183,10 @@ public:
     socks5_op(
         Stream& stream,
         Handler& handler,
-        const std::string& hostname,
+        string_view hostname,
         unsigned short port,
-        const std::string& username,
-        const std::string& password,
+        string_view username,
+        string_view password,
         bool use_hostname)
         : base_type(std::move(handler), stream.get_executor())
         , stream_(stream)
@@ -528,8 +528,8 @@ private:
 
     std::string hostname_;
     unsigned short port_;
-    std::string username_;
-    std::string password_;
+    string_view username_;
+    string_view password_;
     bool use_hostname_;
     int step_ = 0;
 };
@@ -543,9 +543,9 @@ template<
 BOOST_BEAST_ASYNC_RESULT1(Handler)
 async_handshake_v4(
     AsyncStream& stream,
-    const std::string& hostname,
+    string_view hostname,
     unsigned short port,
-    std::string const& username,
+    string_view username,
     Handler&& handler)
 {
     net::async_completion<Handler, void(error_code)> init{ handler };
@@ -571,10 +571,10 @@ template<
 BOOST_BEAST_ASYNC_RESULT1(Handler)
 async_handshake_v5(
     AsyncStream& stream,
-    const std::string& hostname,
+    string_view hostname,
     unsigned short port,
-    std::string const& username,
-    std::string const& password,
+    string_view username,
+    string_view password,
     bool use_hostname,
     Handler&& handler)
 {
